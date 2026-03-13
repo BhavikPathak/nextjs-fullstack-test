@@ -1,15 +1,28 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Dancing_Script, Nunito_Sans, Inconsolata, Geist } from "next/font/google";
 import "./globals.css";
+import { cn } from "@/lib/utils";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+
+export const dancing = Dancing_Script({
   subsets: ["latin"],
+  weight: ["400","500","600","700"],
+  variable: "--font-dancing",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+export const nunito = Nunito_Sans({
   subsets: ["latin"],
+  weight: ["200","300","400","500","600","700","800","900"],
+  style: ["normal","italic"],
+  variable: "--font-nunito",
+});
+
+export const inconsolata = Inconsolata({
+  subsets: ["latin"],
+  weight: ["200","300","400","500","600","700","800","900"],
+  style: ["normal"],
+  variable: "--font-mono",
 });
 
 export const metadata: Metadata = {
@@ -23,9 +36,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={cn("font-sans", geist.variable)}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${dancing.variable} ${nunito.variable} ${inconsolata.variable} antialiased`}
       >
         {children}
       </body>
