@@ -8,6 +8,8 @@ let cachedDb : Db | null = null;
 export async function connectToDB(){
 
     if(cachedClient && cachedDb){
+        console.log('Returned cahced connection');
+        
         return {db : cachedDb , client : cachedClient};
     }
 
@@ -26,5 +28,7 @@ export async function connectToDB(){
     cachedClient = client;
     cachedDb = client.db('simple-db');
 
+    console.log('Connected to DB');
+    
     return { client , db: client.db('simple-db')};
 }

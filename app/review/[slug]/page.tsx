@@ -1,48 +1,151 @@
-import Marquee from "@/app/ui/Marquee";
+"use client";
+
+import TextReveal from "@/app/ui/Text-Reveal";
+import { Button } from "@/components/ui/button";
+import { BabyIcon, ChevronsDown } from "lucide-react";
+import { useRef, useEffect, useState } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useParams } from "next/navigation";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Preview() {
-    return (
-      <section className="min-h-screen mx-auto max-w-4xl">
-        <img src="/test-image-krishiv.JPG" alt="krishiv" className="h-[100vh] w-auto object-cover aspect-auto"/>
-        <h1 className="text-white font-nunito-sans text-6xl">Krishiv Pathak</h1>
-        <div className="absolute bottom-0 rounded-xl bg-white/20 shadow-xl ring-1 ring-black/90 backdrop-blur-md w-full">
-          <h2>You have got a message</h2>
-          <p>Hello labla labaascnasncaksnc</p>
-          <button>Click me</button>
-        </div>
-      </section>
-    )
+  const params = useParams();
+  const revealAtBottomRef = useRef<HTMLDivElement | null>(null)
+  const [textRevealList , setTextRevealList] = useState<string[]>([]);
+  const [exceedLimit, setExceedLimit] = useState(false);
 
-  return (
-    <section className="relative min-h-screen bg-black text-white flex flex-col mx-auto max-w-4xl">
-     {/*  <video src="https://www.pexels.com/download/video/7946013/" autoPlay muted playsInline loop className="h-full w-full opacity-15"></video> */}
-      <div className="absolute w-full h-full">
-      <div className="flex-1 flex flex-col text-center py-10 md:px-10 px-4">
-        <div className="font-nunito-sans font-medium text-5xl flex justify-center w-full"> 
-          <span>You have a message</span>
-        </div>
-        <div className="flex items-center justify-center h-44 w-full">
-            {/* <div className="animate-[spin_30s_linear_infinite] absolute w-44 h-44 bg-blue-secondary bg-cover bg-center mask-[url('/stamp.png')] [-webkit-mask-image:url('/stamp.png')] mask-no-repeat [-webkit-mask-repeat:no-repeat] mask-contain [-webkit-mask-size:contain] mask-center [-webkit-mask-position:center] " />           
-            <div className="animate-[spin_30s_linear_infinite] absolute w-42 h-42 bg-black bg-cover bg-center mask-[url('/stamp.png')] [-webkit-mask-image:url('/stamp.png')] mask-no-repeat [-webkit-mask-repeat:no-repeat] mask-contain [-webkit-mask-size:contain] mask-center [-webkit-mask-position:center]" />
-            <div className="animate-[spin_30s_linear_infinite] absolute w-40 h-40 bg-pink-secondary bg-cover bg-center mask-[url('/stamp.png')] [-webkit-mask-image:url('/stamp.png')] mask-no-repeat [-webkit-mask-repeat:no-repeat] mask-contain [-webkit-mask-size:contain] mask-center [-webkit-mask-position:center]" />
-            <div className="animate-[spin_30s_linear_infinite] absolute w-38 h-38 bg-black bg-cover bg-center mask-[url('/stamp.png')] [-webkit-mask-image:url('/stamp.png')] mask-no-repeat [-webkit-mask-repeat:no-repeat] mask-contain [-webkit-mask-size:contain] mask-center [-webkit-mask-position:center]" />
-            <div className="animate-[spin_30s_linear_infinite] absolute w-36 h-36 bg-blue-primary bg-cover bg-center mask-[url('/stamp.png')] [-webkit-mask-image:url('/stamp.png')] mask-no-repeat [-webkit-mask-repeat:no-repeat] mask-contain [-webkit-mask-size:contain] mask-center [-webkit-mask-position:center]" />
-            <div className="animate-[spin_30s_linear_infinite] absolute w-34 h-34 bg-black bg-cover bg-center mask-[url('/stamp.png')] [-webkit-mask-image:url('/stamp.png')] mask-no-repeat [-webkit-mask-repeat:no-repeat] mask-contain [-webkit-mask-size:contain] mask-center [-webkit-mask-position:center]" />
-            <div className="animate-[spin_30s_linear_infinite] absolute w-32 h-32 bg-pink-primary bg-cover bg-center mask-[url('/stamp.png')] [-webkit-mask-image:url('/stamp.png')] mask-no-repeat [-webkit-mask-repeat:no-repeat] mask-contain [-webkit-mask-size:contain] mask-center [-webkit-mask-position:center]" />
-            <div className="animate-[spin_30s_linear_infinite] absolute w-30 h-30 bg-[#000] bg-cover bg-center mask-[url('/stamp.png')] [-webkit-mask-image:url('/stamp.png')] mask-no-repeat [-webkit-mask-repeat:no-repeat] mask-contain [-webkit-mask-size:contain] mask-center [-webkit-mask-position:center]" /> */}
-            <div className="absolute w-10 h-10 bg-[url('/test-image-krishiv.JPG')] bg-cover bg-center rounded-full" /> 
-        </div>
-        <div className="isolate w-full rounded-xl bg-black/5 shadow-xl drop-shadow-white ring-2 ring-white/10 backdrop-blur-md">Hello
-        <p>hfascla</p>
-        <p>hfascla</p>
-        <p>hfascla</p>
-        <p>hfascla</p>
-        </div>
+  useEffect(() => {
+    if(!params?.slug) return;
+
+    let slug = params?.slug as string;
+
+    const skipViewCount = slug.endsWith('-trail');
+    if(skipViewCount){
+      slug = slug.replace('-trail','');
+    }
+
+    getDetailFromSlug(slug).then((data)=>{
+      if(data){
+        if(!skipViewCount){
+        increaseViewCount(data,slug).then(()=>{
+          setExceedLimit(data.views+1 > data.maxViews);
+        });
+        }
+        setTextRevealList(data.description.split('\n').filter((text:string)=>text));
+      }
+    });
+
+    if (!revealAtBottomRef.current) return;
+
+    gsap.fromTo(
+      revealAtBottomRef.current,
+      { opacity: 0, y: 50 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: document.body,   // track whole page scroll
+          start: () => "bottom bottom", // when page bottom reaches viewport bottom
+          toggleActions: "play none none none"
+        }
+      }
+    )
+  }, []);
+
+  const handleClick = () => {
+    window.open('https://wa.me/9664631933','_blank');
+  }
+
+    if(exceedLimit){
+     return (<div>
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+      <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]"></div>
+      <div className="absolute w-75 h-75 rounded-full 
+        bg-blue-primary blur-[120px]
+        top-[20%] left-[20%]
+        animate-float1">
       </div>
-        <div>
-              <Marquee items={['This is confidential for you keep it within family']} />
-        </div>
+
+      <div className="absolute w-75 h-75 rounded-full
+        bg-pink-primary blur-[120px]
+        bottom-[20%] right-[20%]
+        animate-float2">
       </div>
+    </div>
+    <div className="flex justify-center items-center min-h-screen">
+      <p className=" font-inconsolata text-6xl font-medium text-center">You have exceeded view limit</p>
+    </div>
+     </div>)
+    }
+
+    return (
+   <div className="">
+    <div className="fixed inset-0 -z-10 overflow-hidden">
+      <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]"></div>
+      <div className="absolute w-75 h-75 rounded-full 
+        bg-blue-primary blur-[120px]
+        top-[20%] left-[20%]
+        animate-float1">
+      </div>
+
+      <div className="absolute w-75 h-75 rounded-full
+        bg-pink-primary blur-[120px]
+        bottom-[20%] right-[20%]
+        animate-float2">
+      </div>
+    </div>
+
+    <section className="md:mx-auto max-w-2xl my-10 mx-8">
+      <h1 className="text-2xl font-inconsolata font-medium text-black fixed">Dear Krishiv,
+        <br /><span ref={revealAtBottomRef} className="text-7xl font-dancing-script opacity-0">Bade Bhaiya</span>
+      </h1>
+
+      <div className="fixed left-[45%] bottom-20 text-gray-600 animate-bounce flex justify-center text-center">Scroll down
+        <br /><ChevronsDown></ChevronsDown>
+      </div>
+
+      <div className="h-screen"></div>
+      {textRevealList.map((text,idx)=><TextReveal text={text} key={idx}></TextReveal>)}            
+      <div className="h-[60vh]"></div>
+
+      <div className="p-10 w-full rounded-xl bg-black/5 shadow-xl ring-2 ring-white/80 backdrop-blur-3xl bg-linear-to-r from-blue-secondary/60 to-pink-secondary/60">
+       <p className="font-inconsolata font-regular text-black text-3xl"> It's still early, so we're keeping it within the close family for now.</p>
+
+        <p className="font-dancing-script text-4xl text-center font-extrabold text-white mt-10">#PyaarBhaRa</p>
+      <div className="flex mt-20 gap-5">
+        <Button className="w-full" size={'xl'} onClick={handleClick}> Bless us  <BabyIcon/> </Button>
+      </div>
+      </div>
+
     </section>
-  );
+
+  </div>
+    )
+}
+
+export async function getDetailFromSlug(slug: string) {
+  const res = await fetch(`/api/list/${slug}`, {
+    method: "GET",
+  })
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch")
+  }
+
+  return res.json()
+}
+
+export async function increaseViewCount(data : any, slug:string) {
+  const views = data.views+1;
+  await fetch(`/api/list/${slug}`, {
+  method: "PATCH",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({views}),
+})
 }
