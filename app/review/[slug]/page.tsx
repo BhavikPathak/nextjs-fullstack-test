@@ -7,6 +7,7 @@ import { useRef, useEffect, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useParams } from "next/navigation";
+import { Dataset } from "@/app/ui/DataTable";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -15,6 +16,7 @@ export default function Preview() {
   const revealAtBottomRef = useRef<HTMLDivElement | null>(null)
   const [textRevealList , setTextRevealList] = useState<string[]>([]);
   const [exceedLimit, setExceedLimit] = useState(false);
+  const [details, setDetails] = useState<Dataset>();
 
   useEffect(() => {
     if(!params?.slug) return;
@@ -33,6 +35,7 @@ export default function Preview() {
           setExceedLimit(data.views+1 > data.maxViews);
         });
         }
+        setDetails(data);
         setTextRevealList(data.description.split('\n').filter((text:string)=>text));
       }
     });
@@ -100,11 +103,11 @@ export default function Preview() {
     </div>
 
     <section className="md:mx-auto max-w-2xl my-10 mx-8">
-      <h1 className="text-2xl font-inconsolata font-medium text-black fixed">Dear Krishiv,
-        <br /><span ref={revealAtBottomRef} className="text-7xl font-dancing-script opacity-0">Bade Bhaiya</span>
+      <h1 className="text-2xl font-inconsolata font-medium text-black fixed">Dear {details?.name},
+        <br /><span ref={revealAtBottomRef} className="text-7xl font-dancing-script opacity-0">{details?.relation}</span>
       </h1>
 
-      <div className="fixed left-[45%] bottom-20 text-gray-600 animate-bounce flex justify-center text-center">Scroll down
+      <div className="fixed left-[40%] bottom-20 text-gray-600 animate-bounce flex justify-center text-center">Scroll down
         <br /><ChevronsDown></ChevronsDown>
       </div>
 
