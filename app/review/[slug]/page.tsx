@@ -52,7 +52,7 @@ export default function Preview() {
         ease: "power3.out",
         scrollTrigger: {
           trigger: document.body,   // track whole page scroll
-          start: () => "bottom bottom", // when page bottom reaches viewport bottom
+          start: () => "bottom top", // when page bottom reaches viewport bottom
           toggleActions: "play none none none"
         }
       }
@@ -80,7 +80,7 @@ export default function Preview() {
       </div>
     </div>
     <div className="flex justify-center items-center min-h-screen">
-      <p className=" font-inconsolata text-6xl font-medium text-center">You have exceeded view limit</p>
+      <p className=" font-nunito-sans text-4xl font-medium text-center">You have exceeded view limit</p>
     </div>
      </div>)
     }
@@ -111,12 +111,12 @@ export default function Preview() {
         <br /><ChevronsDown></ChevronsDown>
       </div>
 
-      <div className="h-screen"></div>
+      <div className="h-75"></div>
       {textRevealList.map((text,idx)=><TextReveal text={text} key={idx}></TextReveal>)}            
-      <div className="h-[60vh]"></div>
+      <div className="h-75"></div>
 
       <div className="p-10 w-full rounded-xl bg-black/5 shadow-xl ring-2 ring-white/80 backdrop-blur-3xl bg-linear-to-r from-blue-secondary/60 to-pink-secondary/60">
-       <p className="font-inconsolata font-regular text-black text-3xl"> It's still early, so we're keeping it within the close family for now.</p>
+       <p className="font-inconsolata font-medium text-black text-3xl"> It's still early, so we're keeping it within the close family for now.</p>
 
         <p className="font-dancing-script text-4xl text-center font-extrabold text-white mt-10">#PyaarBhaRa</p>
       <div className="flex mt-20 gap-5">
